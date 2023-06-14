@@ -1,9 +1,10 @@
 """Site pra passar slides"""
 
-from quart import abort, Quart
-from quart import render_template
+import asyncio
 from jinja2 import TemplateNotFound
 import logging
+from quart import abort, Quart
+from quart import render_template
 import sys
 import uvicorn
 
@@ -34,15 +35,28 @@ async def hello():
 if __name__ == '__main__':
   # ~ app.run()
 # ~ else:
-  try:    
+  try:
     uvicorn.run(
-        app,
-        host = '127.0.0.1',
-        port = 15000,
-        forwarded_allow_ips = '*',
-        proxy_headers = True,
-        timeout_keep_alive = 0,
-        log_level = 'info',
+      app,
+      uds = "uvicorn.socket",
+      forwarded_allow_ips = "*",
+      proxy_headers = True,
+      timeout_keep_alive = 0,
+      log_level = "info",
+    )
+  except (
+    OSError,
+    NotImplementedError,
+    asyncio.exceptions.CancelledError,
+  ):
+    uvicorn.run(
+      app,
+      host = "127.0.0.1",
+      port = 15000,
+      forwarded_allow_ips = "*",
+      proxy_headers = True,
+      timeout_keep_alive = 0,
+      log_level = "info",
     )
   except Exception as e:
     logger.exception(e)
