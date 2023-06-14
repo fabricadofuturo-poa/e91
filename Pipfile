@@ -13,4 +13,6 @@ uvicorn = "*"
 python_version = "3.11"
 
 [scripts]
-dev = "python main.py"
+prod = "echo 'lol'"
+test = "python main.py"
+dev = "uvicorn main:app --reload"
