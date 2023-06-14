@@ -20,7 +20,7 @@ Pra quem não tem pipenv:
 python -m venv venv
 .\venv\Scripts\activate # Windows Power Shell
 ./venv/bin/activate # Unix
-(venv) pip install -r requirements
+(venv) pip install -r requirements.txt
 (venv) python main.py
 ```
 
