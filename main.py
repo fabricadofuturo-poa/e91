@@ -4,6 +4,8 @@ from quart import abort, Quart
 from quart import render_template
 from jinja2 import TemplateNotFound
 import logging
+import sys
+import uvicorn
 
 logging.basicConfig(level = logging.INFO)
 logger: logging.Logger = logging.getLogger(__name__)
@@ -30,4 +32,17 @@ async def hello():
     logger.exception(e)
 
 if __name__ == '__main__':
-  app.run()
+  # ~ app.run()
+# ~ else:
+  try:    
+    uvicorn.run(
+        app,
+        host = '127.0.0.1',
+        port = 15000,
+        forwarded_allow_ips = '*',
+        proxy_headers = True,
+        timeout_keep_alive = 0,
+        log_level = 'info',
+    )
+  except Exception as e:
+    logger.exception(e)

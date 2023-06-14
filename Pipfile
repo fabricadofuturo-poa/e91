@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 quart = {extras = ["dotenv"], version = "*"}
+uvicorn = "*"
 
 [dev-packages]
 
