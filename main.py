@@ -39,6 +39,7 @@ try:
   from configparser import ConfigParser, NoSectionError
   from datetime import datetime, timedelta
   from jinja2 import TemplateNotFound
+  import json
   import os
   from quart_auth import (
     AuthManager,
@@ -204,7 +205,7 @@ não conseguiu processar a informação. Tente novamente ou fale com o \
     logger.exception(e)
     return jsonify(repr(e))
 
-@app.route("/dosguri/", methods = ['GET', 'POST'])
+@app.route("/dosguri", methods = ['GET', 'POST'])
 # ~ @login_required
 async def admin() -> str:
   """Dashboard dos Guri"""
@@ -263,6 +264,207 @@ não conseguiu processar a informação. Tente novamente ou fale com o \
     logger.exception(e)
     return jsonify(repr(e))
 
+@app.route("/dosguri/cadastrar", methods = ['GET', 'POST'])
+# ~ @login_required
+async def server() -> str:
+  """Manage Eco server"""
+  global servers
+  status: bool = False
+  message: str | None = None
+  exception: Exception | None = None
+  try:
+    config: ConfigParser = ConfigParser()
+    config.read(servers_file)
+    function_map: dict = {
+      "0": ("Eco Server Status", server_status),
+      "1": ("Start Eco Server", server_start),
+      "2": ("Stop Eco Server", server_proper_stop),
+      "3": ("Restart Eco Server", server_restart),
+      "4": ("Advanced - Force Eco Server Stop", server_stop),
+    }
+    class ServerForm(FlaskForm):
+      """Form for server and action selection"""
+      server_field: RadioField = RadioField(
+        "Select Eco Server",
+        [validators.DataRequired()],
+        choices = [("0", "None")],
+      )
+      action_field: RadioField = RadioField(
+        "Select Action",
+        [validators.DataRequired()],
+        choices = [("0", "None")],
+      )
+      submit: SubmitField = SubmitField("Send")
+      async def validate_server_field(form, field) -> None:
+        """Populate server selection list"""
+        try:
+          field.choices = [(index, server) for index, server in \
+            enumerate(config.sections())]
+        except Exception as e3:
+          logger.exception(e3)
+          exception = e3
+      async def validate_action_field(form, field) -> None:
+        """Populate action selection list"""
+        field.choices = [(k, v[0]) for k, v in \
+          sorted(function_map.items())]
+    form: FlaskForm = ServerForm(formdata = await request.form)
+    await form.validate_server_field(form.server_field)
+    await form.validate_action_field(form.action_field)
+    if request.method == "POST":
+      try:
+        _name: str = config.sections()[int(
+          form["server_field"].data)]
+        process: Popen = servers[_name]
+        _return: dict = await function_map[
+          form["action_field"].data][1](process, _name)
+        servers[_name] = _return["process"]
+        message = _return["message"]
+        exception = _return["exception"]
+        status = _return["status"]
+      except Exception as e2:
+        logger.exception(e2)
+        exception = e2
+    alive: dict[str, bool] = {}
+    for _name, process in servers.items():
+      alive[_name] = False
+      try:
+        alive[_name] = (process.poll() is None)
+      except (ValueError, AttributeError):
+        pass
+      except Exception as e1:
+        logger.exception(e1)
+  except Exception as e:
+    logger.exception(e)
+    exception = e
+  try:
+    return await render_template(
+      "server.html",
+      name = name,
+      version = version,
+      title = "Eco Server Manager",
+      form = form,
+      message = message,
+      exception = exception,
+      alive = alive,
+    )
+  except Exception as e:
+    logger.exception(e)
+    return jsonify(repr(e))
+
+async def edit_server(
+  name: str,
+  path: str,
+  password: str,
+  boot: bool,
+  *args,
+  **kwargs,
+) -> dict[str, bool | str | Exception | None]:
+  """Edit server config on server configuration file"""
+  _return: dict[str, bool | str | Exception | None] = {
+    "status": False,
+    "message": "Could not edit server configuration!",
+    "exception": None,
+  }
+  try:
+    config: ConfigParser = ConfigParser()
+    if not os.path.exists(os.path.dirname(servers_file)):
+      os.makedirs(os.path.dirname(servers_file))
+    config.read(servers_file)
+    try:
+      config.set(name, "boot", str(int(boot)))
+      config.set(name, "password", password)
+      config.set(name, "path", path)
+    except NoSectionError as e2:
+      logger.exception(e2)
+      config.add_section(name)
+      config.set(name, "boot", str(int(boot)))
+      config.set(name, "password", password)
+      config.set(name, "path", path)
+    try:
+      shutil.copy(servers_file,
+        f"{servers_file}.backup.{datetime.utcnow().timestamp()}")
+    except FileNotFoundError:
+      pass
+    try:
+      with open(servers_file, "w+") as srv:
+        config.write(srv)
+      _return["message"] = f"{name} settings updated."
+      _return["status"] = True
+    except Exception as e1:
+      logger.exception(e1)
+      _return["exception"] = e1
+  except Exception as e:
+    logger.exception(e)
+    _return["exception"] = e
+  return _return
+
+@app.route("/contador")
+@app.route("/contador/")
+@app.route("/contador/<chave>")
+async def contador(chave: str | None = None) -> dict[str, str | bool]:
+  """API do Contador"""
+  try:
+    if chave not in [None, '', ' ']:
+      config: ConfigParser = ConfigParser()
+      config.read(user_file)
+      return jsonify({"status": True, "date": config[chave]["date"]})
+  except Exception as e:
+    logger.warning(f"Tentaram recuperar {chave} sem sucesso")
+    logger.exception(e)
+  return jsonify({"status": False, "date": ""})
+
+@app.route("/set_contador", methods = ['POST'])
+async def set_contador(*args, **kwargs) -> dict[str, str | bool]:
+  """POST sobrescreve contador"""
+  _return: dict[str, bool | str | Exception | None] = {
+    "status": False,
+    "message": "Não deu certo",
+    "exception": None,
+  }
+  data: dict[str, str] = json.loads(await request.get_data())
+  if data["chave"] not in ['', ' ', None]:
+    try:
+      agora: datetime = datetime.now()
+      cronometro: timedelta = timedelta(
+        hours = int(data["hora"]),
+        minutes = int(data["minuto"]),
+        seconds = int(data["segundo"]),
+      )
+      minutos: datetime = (
+        (agora + cronometro) - agora
+        ).total_seconds() / 60
+      try:
+        config: ConfigParser = ConfigParser()
+        config.read(user_file)
+        config.set(
+          data["chave"],
+          "date",
+          str((agora + cronometro).timestamp()),
+        )
+        try:
+          shutil.copy(user_file,
+            f"{user_file}.{datetime.utcnow().timestamp()}.backup.ini")
+        except FileNotFoundError as e3:
+          _return["exception"] = repr(e3)
+        try:
+          with open(user_file, "w+") as usr:
+            config.write(usr)
+          _return["message"] = f"""cronômetro de {data["chave"]} \
+atualizado para daqui a {minutos:2.0f} minutos \
+({(agora + cronometro).strftime('%H:%M %d/%m')}). Pode levar até dez \
+segundos para sincronizar."""
+          _return["status"] = True
+        except Exception as e2:
+          logger.exception(e2)
+          _return["exception"] = repr(e2)
+      except NoSectionError as e1:
+        logger.exception(e1)
+        _return["exception"] = repr(e1)
+    except Exception as e:
+      logger.exception(e)
+      _return["exception"] = repr(e)
+  return jsonify(_return)
+
 @app.errorhandler(Unauthorized)
 @app.route("/entrar", methods = ['GET', 'POST'])
 async def login(*e: Exception) -> str:
@@ -311,71 +513,6 @@ errado igual. Reclama pro {responsável}."""
   except Exception as e1:
     logger.exception(e1)
     return jsonify(repr(e1))
-
-@app.route("/contador")
-@app.route("/contador/")
-@app.route("/contador/<chave>")
-async def contador(chave: str | None = None) -> dict[str, str | bool]:
-  """API do Contador"""
-  try:
-    if chave not in [None, '', ' ']:
-      config: ConfigParser = ConfigParser()
-      config.read(user_file)
-      return jsonify({"status": True, "date": config[chave]["date"]})
-  except Exception as e:
-    logger.warning(f"Tentaram recuperar {chave} sem sucesso")
-    logger.exception(e)
-  return jsonify({"status": False, "date": ""})
-
-@app.route("/set_contador")
-@app.route("/set_contador/")
-@app.route("/set_contador/<chave>")
-@app.route("/set_contador/<chave>/<hora>")
-@app.route("/set_contador/<chave>/<hora>/<minuto>")
-@app.route("/set_contador/<chave>/<hora>/<minuto>/<segundo>")
-async def set_contador(
-  chave: str | None = None,
-  hora: str = "0",
-  minuto: str = "0",
-  segundo: str = "0",
-) -> dict[str, str | bool]:
-  """POST sobrescreve contador"""
-  _return: dict[str, bool | str | Exception | None] = {
-    "status": False,
-    "message": "Não deu certo",
-    "exception": None,
-  }
-  logger.info(f"chave: {chave}, hora: {hora}, minuto: {minuto}, segundo: {segundo}")
-  if chave not in ['', ' ', None]:
-    try:
-      config: ConfigParser = ConfigParser()
-      config.read(user_file)
-      try:
-        config.set(chave, "date", str((datetime.now() + timedelta(
-          hours = int(hora),
-          minutes = int(minuto),
-          seconds = int(segundo),
-        )).timestamp()))
-        try:
-          shutil.copy(user_file,
-            f"{user_file}.{datetime.utcnow().timestamp()}.backup.ini")
-        except FileNotFoundError as e3:
-          _return["exception"] = repr(e3)
-        try:
-          with open(user_file, "w+") as usr:
-            config.write(usr)
-          _return["message"] = f"{chave} settings updated."
-          _return["status"] = True
-        except Exception as e2:
-          logger.exception(e2)
-          _return["exception"] = repr(e2)
-      except NoSectionError as e1:
-        logger.exception(e1)
-        _return["exception"] = repr(e1)
-    except Exception as e:
-      logger.exception(e)
-      _return["exception"] = repr(e)
-  return jsonify(_return)
 
 if __name__ == '__main__':
   try:

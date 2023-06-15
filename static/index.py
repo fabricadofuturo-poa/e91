@@ -31,7 +31,7 @@ async def reinicia_contador(*args, **kwargs) -> None:
     # ~ display_error(e)
     pass
 
-def atualiza_contador(*args, **kwargs) -> None:
+async def atualiza_contador(*args, **kwargs) -> None:
   """Atualiza o contador a cada segundo"""
   try:
     global hora_fim

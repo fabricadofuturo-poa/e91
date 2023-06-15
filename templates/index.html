@@ -1,6 +1,17 @@
 {% extends "default_layout.html" %}
 {% block body %}
-{% if code %}
+{% if chave %}
+<link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+<script defer src="https://pyscript.net/latest/pyscript.js"></script>
+<py-config
+src="{{ url_for('static', filename = 'pyscript-config.toml') }}"
+></py-config>
+<py-script>
+contador_url = "{{ url_for('contador', chave = chave) }}"
+</py-script>
+<py-script
+  src="{{ url_for('static', filename = 'index.py') }}"
+></py-script>
 <div class="container">
 <div class="row">
 <div class="col-sm">
@@ -8,15 +19,13 @@
   id="vmixcall"
   src="{{ vm_url }}"
   frameborder="0"
-  style="overflow:hidden;height:100%;width:100%"
-  height="100%"
+  style="overflow:hidden;height:200%;width:100%"
+  height="200%"
   width="100%"
   name="vmix-call-embed"
   allow="camera;microphone"
 ></iframe>
-<!--
-<span>IFRAME VMIX</span>
--->
+
 </div> <!-- col-sm -->
 <div class="col-lg-3">
 <div class="container">
@@ -31,9 +40,6 @@
   frameborder="1"
   margin="0"
 ></iframe>
-<!--
-<span>IFRAME IC</span>
--->
 </div> <!-- col-sm -->
 </div> <!-- row -->
 <div class="row">&nbsp;</div>
@@ -48,10 +54,6 @@
 </div> <!-- col-lg-3 -->
 </div> <!-- row -->
 </div> <!-- container -->
-<py-script>
-contador_url = "{{ url_for('contador', chave = chave) }}"
-</py-script>
-<py-script src="{{ url_for('static', filename = 'index.py') }}"></py-script>
 {% else %}
 <form action="" method="post">
 <p>

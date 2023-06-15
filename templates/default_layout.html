@@ -30,8 +30,6 @@ limitations under the License.
   rel="stylesheet"
   crossorigin="anonymous"
 >
-<link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-<script defer src="https://pyscript.net/latest/pyscript.js"></script>
 <!--
 <link
   rel="stylesheet"
@@ -42,9 +40,6 @@ limitations under the License.
 {% block head %}{% endblock %}
 </head>
 <body>
-<py-config
-src="{{ url_for('static', filename = 'pyscript-config.toml') }}"
-></py-config>
 {% block body %}{% endblock %}
 </body>
 <script

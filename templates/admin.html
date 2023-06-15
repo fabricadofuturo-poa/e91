@@ -1,7 +1,39 @@
 {% extends "default_layout.html" %}
 {% block body %}
-{% if code %}
+{% if chave %}
+<link
+  rel="stylesheet"
+  href="https://pyscript.net/latest/pyscript.css"
+/>
+<script defer src="https://pyscript.net/latest/pyscript.js"></script>
+<py-config
+src="{{ url_for('static', filename = 'pyscript-config.toml') }}"
+></py-config>
+<py-script>
+url = "{{ url_for('set_contador') }}"
+chave = "{{ chave }}"
+contador_url = "{{ url_for('contador', chave = chave) }}"
+</py-script>
+<py-script
+  src="{{ url_for('static', filename = 'index.py') }}"
+></py-script>
+<py-script
+  src="{{ url_for('static', filename = 'admin.py') }}"
+></py-script>
 <div class="container">
+<div class="row">&nbsp;</div>
+<div class="row">
+<div class="col-sm">
+<iframe
+  src="{{ ic_url }}"
+  style="border:0px #ffffff none;width: 100%; height: 100%"
+  name="internet-clicker-embed"
+  scrolling="no"
+  frameborder="1"
+  margin="0"
+></iframe>
+</div> <!-- col-sm -->
+</div> <!-- row -->
 <div class="row">&nbsp;</div>
 <div class="row">
 <div class="col-sm">
@@ -12,32 +44,42 @@
 </div> <!-- row -->
 <div class="row">&nbsp;</div>
 <div class="row">
-<div class="col-sm card">
-<div class="btn-group-vertical">
+<div class="col-sm">
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Reiniciar contador</h5>
+<div class="card-text btn-group">
 {% for m in ('45', '30', '20', '10', '5', '2', '1') %}
 <button
   class="btn btn-primary"
-  py-click="atualiza_contador(minuto = '{{ m }}')"
+  py-click="edita_contador(minuto = '{{ m }}')"
 >+{{ m }}m</button>
 {% endfor %}
 <button
   class="btn btn-warning"
-  py-click="atualiza_contador(segundo = '30')"
+  py-click="edita_contador(segundo = '30')"
 >+30s</button>
-<button class="btn btn-danger" py-click="atualiza_contador()"
+<button class="btn btn-danger" py-click="edita_contador()"
 >CHEGA</button>
 </div> <!-- btn-group -->
-</div> <!--col-sm card -->
+</div> <!-- card-body -->
+</div> <!-- card -->
+</div> <!--col-sm -->
 </div> <!-- row -->
 <div class="row">
 <div class="col">
 <div class="container">
+<div class="row">&nbsp;</div>
 <div class="row">
 <div class="col">
-<div class="card bg-info text-dark mb-3 shadow-sm">
-<div id="logging" class="card-body">
+<div class="card">
+<div id="log-outer" class="card-body">
+<h5 class="cart-title">Log</h5>
+<div class="card-text">
+<div id="log-inner" role="alert" class="alert"></div>
+</div> <!-- card-text -->
 </div> <!-- card-body -->
-</div> <!-- card bg-info text-dark mb-3 shadow-sm -->
+</div> <!-- card -->
 </div> <!-- col -->
 </div> <!-- row -->
 </div> <!-- container -->
@@ -70,34 +112,6 @@
 </div> <!-- container -->
 {% endif %}
 {% endif %}
-<py-script>
-import logging
-# ~ logging.basicConfig(level = logging.INFO)
-logging.basicConfig(level = logging.DEBUG)
-logger = logging.getLogger(__name__)
-try:
-  import asyncio
-  from datetime import datetime
-  import pyodide
-  from pyodide import http
-except Exception as e:
-  logger.exception(e)
-
-async def atualiza_contador(
-  chave: str = "{{ chave }}",
-  hora: str = "0",
-  minuto: str = "0",
-  segundo: str = "0",
-  *args,
-  **kwargs,
-) -> None:
-  """Atualiza contador dos Guri"""
-  api_response: object = await http.pyfetch(f"""/set_contador/{chave}/\
-{hora}/{minuto}/{segundo}""")
-  response: dict[str] = await api_response.json()
-  Element("logging").element.innerText = f"""response: {response}, \
-query: /set_contador/{chave}/{hora}/{minuto}/{segundo}"""
-</py-script>
 {% endblock %}
 <!--
 <script type="text/javascript"
