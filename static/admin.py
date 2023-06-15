@@ -12,7 +12,7 @@ try:
 except Exception as e:
   logger.exception(e)
 
-log_alert: Element = Element("log-inner")
+log_alert: Element = Element("logging")
 
 async def log(element: Element, text: str, bg: str) -> None:
   """Muda o fundo de um elemento e escreve texto"""
