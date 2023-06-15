@@ -1,0 +1,107 @@
+{% extends "default_layout.html" %}
+{% block body %}
+{% if code %}
+<div class="container">
+<div class="row">&nbsp;</div>
+<div class="row">
+<div class="col-sm">
+<center>
+<div id="contador" class="row bg-success"></div>
+</center>
+</div> <!-- col-sm -->
+</div> <!-- row -->
+<div class="row">&nbsp;</div>
+<div class="row">
+<div class="col-sm card">
+<div class="btn-group-vertical">
+{% for m in ('45', '30', '20', '10', '5', '2', '1') %}
+<button
+  class="btn btn-primary"
+  py-click="atualiza_contador(minuto = '{{ m }}')"
+>+{{ m }}m</button>
+{% endfor %}
+<button
+  class="btn btn-warning"
+  py-click="atualiza_contador(segundo = '30')"
+>+30s</button>
+<button class="btn btn-danger" py-click="atualiza_contador()"
+>CHEGA</button>
+</div> <!-- btn-group -->
+</div> <!--col-sm card -->
+</div> <!-- row -->
+<div class="row">
+<div class="col">
+<div class="container">
+<div class="row">
+<div class="col">
+<div class="card bg-info text-dark mb-3 shadow-sm">
+<div id="logging" class="card-body">
+</div> <!-- card-body -->
+</div> <!-- card bg-info text-dark mb-3 shadow-sm -->
+</div> <!-- col -->
+</div> <!-- row -->
+</div> <!-- container -->
+</div> <!-- col -->
+</div> <!-- row -->
+</div> <!-- container -->
+{% else %}
+<form action="" method="post">
+<p>
+{{ form.chave.label }}
+{{ form.chave(class="form-control") }}
+{% for error in form.chave.errors %}
+  <span class="badge badge-danger">[{{ error }}]</span>
+{% endfor %}
+</p>
+<p>{{ form.submit(class="btn btn-primary") }}</p>
+</form>
+{% if mensagem %}
+<hr>
+<div class="container">
+<div class="row">
+<div class="col">
+<div class="card bg-warning text-dark mb-3 shadow-sm">
+<div class="card-body">
+{{ mensagem }}
+</div> <!-- card-body -->
+</div> <!-- card -->
+</div> <!-- col -->
+</div> <!-- row -->
+</div> <!-- container -->
+{% endif %}
+{% endif %}
+<py-script>
+import logging
+# ~ logging.basicConfig(level = logging.INFO)
+logging.basicConfig(level = logging.DEBUG)
+logger = logging.getLogger(__name__)
+try:
+  import asyncio
+  from datetime import datetime
+  import pyodide
+  from pyodide import http
+except Exception as e:
+  logger.exception(e)
+
+async def atualiza_contador(
+  chave: str = "{{ chave }}",
+  hora: str = "0",
+  minuto: str = "0",
+  segundo: str = "0",
+  *args,
+  **kwargs,
+) -> None:
+  """Atualiza contador dos Guri"""
+  api_response: object = await http.pyfetch(f"""/set_contador/{chave}/\
+{hora}/{minuto}/{segundo}""")
+  response: dict[str] = await api_response.json()
+  Element("logging").element.innerText = f"""response: {response}, \
+query: /set_contador/{chave}/{hora}/{minuto}/{segundo}"""
+</py-script>
+{% endblock %}
+<!--
+<script type="text/javascript"
+  src="{{ url_for('static', filename = 'admin.js') }}"
+></script>
+-->
+

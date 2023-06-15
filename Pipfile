@@ -4,7 +4,10 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+argon2-cffi = "*"
+flask-wtf = "*"
 quart = {extras = ["dotenv"], version = "*"}
+quart-auth = "*"
 uvicorn = "*"
 
 [dev-packages]
