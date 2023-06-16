@@ -1,19 +1,5 @@
-{% extends "default_layout.html" %}
-{% block body %}
-<nav aria-label="breadcrumb">
-<ol class="breadcrumb">
-<li class="breadcrumb-item"><a href="{{ url_for('apresentacao') }}">
-Apresenta&ccedil;&atilde;o</a></li>
-<li class="breadcrumb-item active" aria-current="page">
-Dashboard dos Guri</li>
-<li class="breadcrumb-item"><a href="{{ url_for('cadastrar') }}">
-Cadastro de apresenta&ccedil;&atilde;o</a></li>
-<li class="breadcrumb-item"><a href="{{ url_for('register') }}">
-Registro dos Guri</a></li>
-<li class="breadcrumb-item"><a href="{{ url_for('login') }}">
-Login dos Guri</a></li>
-</ol>
-</nav>
+{% extends "admin_layout.html" %}
+{% block main %}
 {% if chave %}
 <link
   rel="stylesheet"
@@ -128,9 +114,3 @@ contador_url = "{{ url_for('contador', chave = chave) }}"
 {% endif %}
 {% endif %}
 {% endblock %}
-<!--
-<script type="text/javascript"
-  src="{{ url_for('static', filename = 'admin.js') }}"
-></script>
--->
-

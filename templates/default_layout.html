@@ -30,22 +30,16 @@ limitations under the License.
   rel="stylesheet"
   crossorigin="anonymous"
 >
-<!--
-<link
-  rel="stylesheet"
-  href="{{ url_for('static', filename = 'index.css') }}"
-/>
--->
+<style>
+body {
+  --bs-bg-opacity: 1;
+  background-color: rgba(var(--bs-tertiary-bg-rgb),var(--bs-bg-opacity))!important;
+}
+</style>
 <title>{{ title }}</title>
 {% block head %}{% endblock %}
 </head>
-<body>
-{% block body %}{% endblock %}
-</body>
-<script
-  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"
-  crossorigin="anonymous"
-></script>
+<body>{% block body %}{% endblock %}</body>
 <script
   src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/js/fontawesome.min.js"
   crossorigin="anonymous"
@@ -55,12 +49,4 @@ limitations under the License.
   integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
   crossorigin="anonymous"
 ></script>
-<!--
-<script type="text/javascript">var contagem = new Date({{ data }});</script>
--->
-<!--
-<script type="text/javascript"
-  src="{{ url_for('static', filename = 'index.js') }}"
-></script>
--->
 </html>

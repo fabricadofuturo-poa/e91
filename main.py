@@ -506,7 +506,8 @@ async def login(*e: Exception) -> str:
             form["password"].data,
           )
           login_user(AuthUser(user.get("id")))
-          if current_user.is_authenticated:
+          if await current_user.is_authenticated:
+            login = True
             message = f"""Não sei como, mas tu acertou a senha. \
 Conectado como {form["username"].data}. É os guri."""
           else:
@@ -528,7 +529,7 @@ errado igual. Reclama pro {responsável}."""
   try:
     return await render_template(
       "login.html",
-      title = "Login",
+      title = "Login dos Guri",
       form = form,
       message = message,
       exception = exception,
@@ -544,8 +545,16 @@ async def logout() -> str:
   try:
     while (await current_user.is_authenticated):
       logout_user()
-    return await render_template_string("""<p>E N&Atilde;O OLHA PRA \
-TRÁS</p><p><a href='{{ url_for("login") }}'>voltar</a></p>""")
+  except Exception as e:
+    logger.exception(e)
+    return jsonify(repr(e))
+  try:
+    return await render_template(
+      "login.html",
+      title = "Sair",
+      login = True,
+      logout = True,
+    )
   except Exception as e:
     logger.exception(e)
     return jsonify(repr(e))

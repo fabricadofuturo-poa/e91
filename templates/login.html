@@ -1,76 +1,165 @@
-{% extends "default_layout.html" %}
-{% block body %}
-<nav aria-label="breadcrumb">
-<ol class="breadcrumb">
-<li class="breadcrumb-item"><a href="{{ url_for('apresentacao') }}">
-Apresenta&ccedil;&atilde;o</a></li>
-<li class="breadcrumb-item"><a href="{{ url_for('admin') }}">
-Dashboard dos Guri</a></li>
-<li class="breadcrumb-item"><a href="{{ url_for('cadastrar') }}">
-Cadastro de apresenta&ccedil;&atilde;o</a></li>
-<li class="breadcrumb-item"><a href="{{ url_for('register') }}">
-Registro dos Guri</a></li>
-<li class="breadcrumb-item active" aria-current="page">
-Login dos Guri</li>
-</ol>
-</nav>
-<h2>{{ title }}</h2>
+{% extends "admin_layout.html" %}
+{% block head %}
+<script type="text/javascript">
+document.body.className = 
+  "d-flex align-items-center py-4 bg-body-tertiary";
+</script>
+<meta name="theme-color" content="#712cf9">
+<style>
+.bd-placeholder-img {
+  font-size: 1.125rem;
+  text-anchor: middle;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+@media (min-width: 768px) {
+  .bd-placeholder-img-lg {
+    font-size: 3.5rem;
+  }
+}
+
+.b-example-divider {
+  width: 100%;
+  height: 3rem;
+  background-color: rgba(0, 0, 0, .1);
+  border: solid rgba(0, 0, 0, .15);
+  border-width: 1px 0;
+  box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+}
+
+.b-example-vr {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 100vh;
+}
+
+.bi {
+  vertical-align: -.125em;
+  fill: currentColor;
+}
+
+.nav-scroller {
+  position: relative;
+  z-index: 2;
+  height: 2.75rem;
+  overflow-y: hidden;
+}
+
+.nav-scroller .nav {
+  display: flex;
+  flex-wrap: nowrap;
+  padding-bottom: 1rem;
+  margin-top: -1px;
+  overflow-x: auto;
+  text-align: center;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.btn-bd-primary {
+  --bd-violet-bg: #712cf9;
+  --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+  --bs-btn-font-weight: 600;
+  --bs-btn-color: var(--bs-white);
+  --bs-btn-bg: var(--bd-violet-bg);
+  --bs-btn-border-color: var(--bd-violet-bg);
+  --bs-btn-hover-color: var(--bs-white);
+  --bs-btn-hover-bg: #6528e0;
+  --bs-btn-hover-border-color: #6528e0;
+  --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+  --bs-btn-active-color: var(--bs-btn-hover-color);
+  --bs-btn-active-bg: #5a23c8;
+  --bs-btn-active-border-color: #5a23c8;
+}
+.bd-mode-toggle {
+  z-index: 1500;
+}
+html,
+body {
+  height: 100%;
+}
+
+.form-signin {
+  max-width: 330px;
+  padding: 1rem;
+}
+
+.form-signin .form-floating:focus-within {
+  z-index: 2;
+}
+
+.form-signin input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+</style>
+{% endblock %}
+{% block main %}
+<main class="form-signin w-100 m-auto">
 {% if message %}
-<h3>Resultado do &uacute;ltimo comando:</h3>
-<div class="container">
-<div class="row">
-<div class="col">
-<div class="card bg-info text-dark mb-3 shadow-sm">
-<div class="card-body">
-<div class="card-text">
+<h4>Resultado do &uacute;ltimo comando:</h4>
+<div role="alert" class="alert alert-info">
 {{ message }}
-</div> <!-- card-text -->
-</div> <!-- card-body -->
-</div> <!-- card -->
-</div> <!-- col -->
-</div> <!-- row -->
-</div> <!-- container -->
-<hr>
+</div> <!-- alert -->
 {% endif %}
 {% if exception %}
-<h3>&Uacute;ltimo erro:</h3>
-<div class="container">
-<div class="row">
-<div class="col">
-<div class="card bg-danger text-dark mb-3 shadow-sm">
-<div class="card-body">
-<div class="card-text">
+<h4>&Uacute;ltimo erro:</h4>
+<div role="alert" class="alert alert-danger">
 {{ exception }}
-</div> <!-- card-text -->
-</div> <!-- card-body -->
-</div> <!-- card -->
-</div> <!-- col -->
-</div> <!-- row -->
-</div> <!-- container -->
-<hr>
+</div> <!-- alert -->
 {% endif %}
 {% if not login %}
-<h3>V&oacute;s n&atilde;o estardes autorizada(o)(e). Fassuavor fornecer 
-a senha ou VAZA</h3>
-<hr>
 <form action="" method="post">
+<img
+  class="mb-4"
+  src="{{ url_for('static', filename = 'fdof.png') }}"
+  alt=""
+  width="100%"
+  height="100%"
+>
+<h1 class="h3 mb-3 fw-normal">{{ title }}</h1>
+<h5>V&oacute;s n&atilde;o estardes autorizada(o)(e). Fassuavor fornecer 
+a senha ou por gentileza
+{{ ('VAZA', 'ABRE', 'SOLTA', 'PICA A MULA', 'TE ARRANCA') | random }}
+</h5>
 {% for item in (
   form.username,
   form.password,
 ) %}
-<div class="mb-3">
-{{ item.label(class="form-label") }}
+<div class="form-floating">
 {{ item(class="form-control") }}
+{{ item.label(class="form-label") }}
 </div>
 {% for error in item.errors %}
   <span class="badge badge-danger">[{{ error }}]</span>
 {% endfor %}
 {% endfor %}
-{{ form.submit(class="btn btn-primary") }}
+{{ form.submit(class="btn btn-primary w-100 py-2") }}
+<p
+  class="mt-5 mb-3 text-body-secondary"
+>&copy; F&aacute;brica do Futuro 2023</p>
 </form>
+{% elif logout %}
+<div role="alert" class="alert alert-success">
+E N&Atilde;O OLHA PRA TR&Aacute;S&excl;
+<br /><a href='{{ url_for("login") }}'>voltar</a>
+</div>
 {% else %}
-<p>Perdestes o cu nessa p&aacute;gina? Tu j&aacute; t&aacute; logado, 
-tch&ecirc;&excl; Pra deslogar clica 
-<a href="{{ url_for('logout') }}" target="_self">aqui</a>.</p>
+<div role="alert" class="alert alert-secondary">
+Perdestes o cu nessa p&aacute;gina? Tu 
+j&aacute; t&aacute; logado, tch&ecirc;&excl; Pra deslogar clica 
+<a href="{{ url_for('logout') }}" target="_self">aqui</a>.
+</div>
 {% endif %}
+</main>
 {% endblock %}

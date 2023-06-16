@@ -1,19 +1,5 @@
-{% extends "default_layout.html" %}
-{% block body %}
-<nav aria-label="breadcrumb">
-<ol class="breadcrumb">
-<li class="breadcrumb-item"><a href="{{ url_for('apresentacao') }}">
-Apresenta&ccedil;&atilde;o</a></li>
-<li class="breadcrumb-item"><a href="{{ url_for('admin') }}">
-Dashboard dos Guri</a></li>
-<li class="breadcrumb-item active" aria-current="page">
-Cadastro de apresenta&ccedil;&atilde;o</li>
-<li class="breadcrumb-item"><a href="{{ url_for('register') }}">
-Registro dos Guri</a></li>
-<li class="breadcrumb-item"><a href="{{ url_for('login') }}">
-Login dos Guri</a></li>
-</ol>
-</nav>
+{% extends "admin_layout.html" %}
+{% block main %}
 <h2>{{ title }}</h2>
 {% if message %}
 <h3>Resultado do &uacute;ltimo comando:</h3>
@@ -93,4 +79,5 @@ Login dos Guri</a></li>
 {% endfor %}
 {{ form.submit(class="btn btn-primary") }}
 </form>
+</body>
 {% endblock %}
