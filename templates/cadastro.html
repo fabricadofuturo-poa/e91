@@ -1,0 +1,96 @@
+{% extends "default_layout.html" %}
+{% block body %}
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="{{ url_for('apresentacao') }}">
+Apresenta&ccedil;&atilde;o</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('admin') }}">
+Dashboard dos Guri</a></li>
+<li class="breadcrumb-item active" aria-current="page">
+Cadastro de apresenta&ccedil;&atilde;o</li>
+<li class="breadcrumb-item"><a href="{{ url_for('register') }}">
+Registro dos Guri</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('login') }}">
+Login dos Guri</a></li>
+</ol>
+</nav>
+<h2>{{ title }}</h2>
+{% if message %}
+<h3>Resultado do &uacute;ltimo comando:</h3>
+<div class="container">
+<div class="row">
+<div class="col">
+<div class="card bg-info text-dark mb-3 shadow-sm">
+<div class="card-body">
+<div class="card-text">
+{{ message }}
+</div> <!-- card-text -->
+</div> <!-- card-body -->
+</div> <!-- card -->
+</div> <!-- col -->
+</div> <!-- row -->
+</div> <!-- container -->
+<hr>
+{% endif %}
+{% if exception %}
+<h3>&Uacute;ltimo erro:</h3>
+<div class="container">
+<div class="row">
+<div class="col">
+<div class="card bg-danger text-dark mb-3 shadow-sm">
+<div class="card-body">
+<div class="card-text">
+{{ exception }}
+</div> <!-- card-text -->
+</div> <!-- card-body -->
+</div> <!-- card -->
+</div> <!-- col -->
+</div> <!-- row -->
+</div> <!-- container -->
+<hr>
+{% endif %}
+{% if events %}
+<h3>Apresenta&ccedil;&otilde;es cadastradas</h3>
+<h4>(use a mesma chave no formul&aacute;rio abaixo para sobrescrever)
+</h4>
+<table class="table table-striped table-hover table-light">
+<thead>
+  <tr>
+    <th scope="col">Chave</th>
+    <th scope="col">Nome VMIX</th>
+    <th scope="col">Chave VMIX</th>
+    <th scope="col">C&oaacute;digo Internet Clicker</th>
+  </tr>
+</thead>
+<tbody>
+{% for event in events.items() %}
+  <tr>
+    <th scope="row">{{ event[0] }}</th>
+    <td>{{ event[1]["vmix_name"] }}</td>
+    <td>{{ event[1]["vmix_key"] }}</td>
+    <td>{{ event[1]["internet_clicker_code"] }}</td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+<hr>
+{% endif %}
+<h3>Cadastrar nova apresenta&ccedil;&atilde;o</h3>
+<form action="" method="post">
+{% for item in (
+  form.chave,
+  form.vmix_name,
+  form.vmix_key,
+  form.internet_clicker_code,
+) %}
+<div class="mb-3">
+{{ item.label(class="form-label") }}
+{{ item(class="form-control") }}
+</div>
+{% for error in item.errors %}
+  <span class="badge badge-danger">[{{ error }}]</span>
+{% endfor %}
+{% endfor %}
+{{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}

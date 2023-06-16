@@ -1,0 +1,76 @@
+{% extends "default_layout.html" %}
+{% block body %}
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="{{ url_for('apresentacao') }}">
+Apresenta&ccedil;&atilde;o</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('admin') }}">
+Dashboard dos Guri</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('cadastrar') }}">
+Cadastro de apresenta&ccedil;&atilde;o</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('register') }}">
+Registro dos Guri</a></li>
+<li class="breadcrumb-item active" aria-current="page">
+Login dos Guri</li>
+</ol>
+</nav>
+<h2>{{ title }}</h2>
+{% if message %}
+<h3>Resultado do &uacute;ltimo comando:</h3>
+<div class="container">
+<div class="row">
+<div class="col">
+<div class="card bg-info text-dark mb-3 shadow-sm">
+<div class="card-body">
+<div class="card-text">
+{{ message }}
+</div> <!-- card-text -->
+</div> <!-- card-body -->
+</div> <!-- card -->
+</div> <!-- col -->
+</div> <!-- row -->
+</div> <!-- container -->
+<hr>
+{% endif %}
+{% if exception %}
+<h3>&Uacute;ltimo erro:</h3>
+<div class="container">
+<div class="row">
+<div class="col">
+<div class="card bg-danger text-dark mb-3 shadow-sm">
+<div class="card-body">
+<div class="card-text">
+{{ exception }}
+</div> <!-- card-text -->
+</div> <!-- card-body -->
+</div> <!-- card -->
+</div> <!-- col -->
+</div> <!-- row -->
+</div> <!-- container -->
+<hr>
+{% endif %}
+{% if not login %}
+<h3>V&oacute;s n&atilde;o estardes autorizada(o)(e). Fassuavor fornecer 
+a senha ou VAZA</h3>
+<hr>
+<form action="" method="post">
+{% for item in (
+  form.username,
+  form.password,
+) %}
+<div class="mb-3">
+{{ item.label(class="form-label") }}
+{{ item(class="form-control") }}
+</div>
+{% for error in item.errors %}
+  <span class="badge badge-danger">[{{ error }}]</span>
+{% endfor %}
+{% endfor %}
+{{ form.submit(class="btn btn-primary") }}
+</form>
+{% else %}
+<p>Perdestes o cu nessa p&aacute;gina? Tu j&aacute; t&aacute; logado, 
+tch&ecirc;&excl; Pra deslogar clica 
+<a href="{{ url_for('logout') }}" target="_self">aqui</a>.</p>
+{% endif %}
+{% endblock %}
